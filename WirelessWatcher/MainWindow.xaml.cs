@@ -16,12 +16,14 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Net;
-using NetgearLogParser.Properties;
+using WirelessWatcher.Properties;
 using Microsoft.Win32;
 using System.Xml.Serialization;
 using System.Xml;
+using SWF = System.Windows.Forms;
+using System.Reflection;
 
-namespace NetgearLogParser
+namespace WirelessWatcher
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -95,6 +97,21 @@ namespace NetgearLogParser
         /// </summary>
         private bool IsDirty;
 
+        /// <summary>
+        /// Our tray icon to hang notifications from
+        /// </summary>
+        private SWF.NotifyIcon trayIcon;
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Triggers when an "Unknown" MAC address is detected
+        /// </summary>
+        public event AlertRaisedEventHandler AlertRaised;
+        public delegate void AlertRaisedEventHandler(object sender, AlertEventArgs e);
+
         #endregion
 
         public MainWindow()
@@ -102,11 +119,79 @@ namespace NetgearLogParser
             InitializeComponent();
 
             DataContext = this;
+            AlertRaised += new AlertRaisedEventHandler(MainWindow_AlertRaised);
+
             allMachines = new List<MachineInfo>();
             knownMachines = new List<MachineInfo>();
-            ReadKnownMachines();
             fileToParse = Settings.Default.lastUsedLogFile;
             IsDirty = false;
+
+            ReadKnownMachines();
+            BuildTrayIcon();
+        }
+
+        /// <summary>
+        /// Handle notifying the user if something fishy is going on
+        /// </summary>
+        /// <param name="e">The MAC address</param>
+        void MainWindow_AlertRaised(object sender, AlertEventArgs e)
+        {
+            trayIcon.BalloonTipIcon = SWF.ToolTipIcon.Warning;
+            trayIcon.BalloonTipTitle = "Unrecognized MAC address connected!";
+            trayIcon.BalloonTipText = String.Format("The MAC address {0} just connected to your network.", e.MACAddress);
+            trayIcon.ShowBalloonTip(30000);
+        }
+
+        /// <summary>
+        ///  Wrapper to raise an alert for a bad MAC address
+        /// </summary>
+        /// <param name="mac">MAC address to alert the user for</param>
+        void RaiseAlert(String mac)
+        {
+            AlertRaisedEventHandler handler = AlertRaised;
+            if (handler != null)
+            {
+                handler(this, new AlertEventArgs(mac));
+            }
+        }
+
+        /// <summary>
+        /// initial configuration/setup for our tray icon
+        /// </summary>
+        private void BuildTrayIcon()
+        {
+            trayIcon = new SWF.NotifyIcon();
+            trayIcon.Click += new EventHandler(trayIcon_Click);
+            trayIcon.BalloonTipClicked += new EventHandler(trayIcon_BalloonTipClicked);
+            trayIcon.Icon = Properties.Resources.skepticalKitty;
+            trayIcon.Text = "WirelessWatcher";
+            trayIcon.Visible = true;
+        }
+
+        void trayIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            // always display the app if the user is clicking our warning
+            this.WindowState = WindowState.Normal;
+            this.Visibility = Visibility.Visible;
+        }
+
+        void trayIcon_Click(object sender, EventArgs e)
+        {
+            switch (this.Visibility)
+            {
+                case Visibility.Collapsed:
+                    this.WindowState = WindowState.Minimized;
+                    this.Visibility = Visibility.Hidden;
+                    break;
+                case Visibility.Hidden:
+                    this.WindowState = WindowState.Normal;
+                    this.Visibility = Visibility.Visible;
+                    break;
+                case Visibility.Visible:
+                    this.WindowState = WindowState.Minimized;
+                    this.Visibility = Visibility.Hidden;
+                    break;
+            }
         }
 
         private void readLogButton_Click(object sender, RoutedEventArgs e)
@@ -166,6 +251,10 @@ namespace NetgearLogParser
                                 if (knownBox != null)
                                 {
                                     mInfo.Description = knownBox.Description;
+                                }
+                                else
+                                {
+                                    RaiseAlert(mInfo.MACAddress);
                                 }
                                 allMachines.Add(mInfo);
                             }
@@ -284,6 +373,8 @@ namespace NetgearLogParser
             Settings.Default.Save();
 
             SaveKnownMachines();
+            trayIcon.Visible = false;
+            trayIcon.Dispose();
         }
 
         /// <summary>
@@ -322,4 +413,5 @@ namespace NetgearLogParser
             }
         }
     }
+
 }

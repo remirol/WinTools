@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NetgearLogParser.Properties {
+namespace WirelessWatcher.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace NetgearLogParser.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NetgearLogParser.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WirelessWatcher.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,13 @@ namespace NetgearLogParser.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        internal static System.Drawing.Icon skepticalKitty {
+            get {
+                object obj = ResourceManager.GetObject("skepticalKitty", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
     }

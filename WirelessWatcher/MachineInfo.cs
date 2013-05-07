@@ -6,7 +6,7 @@ using System.Net;
 using System.Xml.Serialization;
 using System.Xml;
 
-namespace NetgearLogParser
+namespace WirelessWatcher
 {
     [Serializable]
     public class MachineInfo : IComparable, IEquatable<MachineInfo>
@@ -16,16 +16,13 @@ namespace NetgearLogParser
         public DateTime LastSeen;
 
         [XmlIgnore]
-        public IPAddress LastIP;
+        public IPAddress LastIP;    // can't serialize IPAddress-es and we don't care anyway
 
         /// <summary>
         /// Creates a machine object with default information
         /// </summary>
         public MachineInfo() : this("00:00:00:00:00:00")
         {
-            Description = "UNKNOWN";
-            LastSeen = DateTime.MinValue;
-            LastIP = new IPAddress(0xFFFFFFFF);
         }
 
         /// <summary>
@@ -35,6 +32,9 @@ namespace NetgearLogParser
         public MachineInfo(String macAddress)
         {
             MACAddress = macAddress;
+            Description = "UNKNOWN";
+            LastSeen = DateTime.MinValue;
+            LastIP = new IPAddress(0xFFFFFFFF);
         }
 
         #region IComparable Members
