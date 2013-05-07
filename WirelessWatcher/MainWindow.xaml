@@ -6,17 +6,18 @@
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
+        WindowStartupLocation="CenterScreen"
         >
     <DockPanel LastChildFill="True">
         <DockPanel MinHeight="60" DockPanel.Dock="Bottom" LastChildFill="False">
-            <TextBox DockPanel.Dock="Bottom" Height="25"  Name="statusBar" VerticalAlignment="Top" IsReadOnly="True" Text="{Binding Path=statusText}" FontSize="11" Background="#CDD8D8D8" />
+            <TextBox DockPanel.Dock="Bottom" Height="25"  Name="statusBar" VerticalAlignment="Top" IsReadOnly="True" Text="{Binding Path=statusText}" FontSize="11" Background="#FFE8E8E8" />
             <Button DockPanel.Dock="Left" Content="Browse" Height="37" HorizontalAlignment="Left" Margin="10" Name="browseButton" VerticalAlignment="Bottom" Width="116" Click="browseButton_Click" />
             <Button DockPanel.Dock="Left" Content="Refresh" Height="37" HorizontalAlignment="Left" Margin="10" Name="readLogButton" VerticalAlignment="Bottom" Width="116" Click="readLogButton_Click" />
             <Button DockPanel.Dock="Left" Content="Mark Known" Height="37" HorizontalAlignment="Left" Margin="10" Name="markButton" VerticalAlignment="Bottom" Width="116" Click="markButton_Click" />
             <Button DockPanel.Dock="Right" Content="Exit" Height="37" HorizontalAlignment="Right" Margin="10" Name="exitButton" VerticalAlignment="Bottom" Width="116" Click="exitButton_Click" />
         </DockPanel>
         <DockPanel MinHeight="400" LastChildFill="True" Margin="10,0">
-            <TextBox DockPanel.Dock="Bottom" Height="30" Margin="0,10,0,0" Name="filePath" VerticalAlignment="Top" IsReadOnly="True" Text="{Binding Path=fileToParse}"/>
+            <TextBox DockPanel.Dock="Bottom" Height="30" Margin="0,10,0,0" Name="filePath" VerticalAlignment="Top" IsReadOnly="True" Text="{Binding Path=fileToParse}" Background="#FFE8E8E8" />
             <ListBox DockPanel.Dock="Top" Name="messageList" ItemsSource="{Binding Path=messages}" FontFamily="Lucida Console"/>
         </DockPanel>
     </DockPanel>

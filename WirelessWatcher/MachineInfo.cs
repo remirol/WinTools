@@ -18,13 +18,23 @@ namespace NetgearLogParser
         [XmlIgnore]
         public IPAddress LastIP;
 
-        public MachineInfo()
+        /// <summary>
+        /// Creates a machine object with default information
+        /// </summary>
+        public MachineInfo() : this("00:00:00:00:00:00")
         {
-            // add some generic crud here
-            MACAddress = "00:00:00:00:00:00";
             Description = "UNKNOWN";
             LastSeen = DateTime.MinValue;
             LastIP = new IPAddress(0xFFFFFFFF);
+        }
+
+        /// <summary>
+        /// Creates a machine object, specifying a MAC address
+        /// </summary>
+        /// <param name="macAddress">MAC address to assign to this machine</param>
+        public MachineInfo(String macAddress)
+        {
+            MACAddress = macAddress;
         }
 
         #region IComparable Members

@@ -1,7 +1,8 @@
 ﻿<Window x:Class="NetgearLogParser.EditDetails"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Mark Known" SizeToContent="WidthAndHeight" MinWidth="300" Loaded="Window_Loaded">
+        Title="Mark Known" SizeToContent="WidthAndHeight" MinWidth="300" Loaded="Window_Loaded"
+        WindowStartupLocation="CenterOwner">
     <DockPanel LastChildFill="True">
         <Label DockPanel.Dock="Top">Enter a description for this MAC address:</Label>
         <Label DockPanel.Dock="Top" HorizontalAlignment="Center" Name="displayMAC" Content="{Binding Path=macAddress}" />

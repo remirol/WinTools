@@ -90,6 +90,11 @@ namespace NetgearLogParser
         /// </summary>
         private List<MachineInfo> knownMachines;
 
+        /// <summary>
+        /// whether we've made changes to the "known MAC" list
+        /// </summary>
+        private bool IsDirty;
+
         #endregion
 
         public MainWindow()
@@ -101,6 +106,7 @@ namespace NetgearLogParser
             knownMachines = new List<MachineInfo>();
             ReadKnownMachines();
             fileToParse = Settings.Default.lastUsedLogFile;
+            IsDirty = false;
         }
 
         private void readLogButton_Click(object sender, RoutedEventArgs e)
@@ -126,23 +132,25 @@ namespace NetgearLogParser
             try
             {
                 allMachines.Clear();
+
+                // note: this is specific to WNDR4000, should eventually be put into table of routers to select from
                 Regex matchString = new Regex(@"\[DHCP IP: \((.*)\)\] to MAC address ([\d\:abcdef]+), (.*)", RegexOptions.IgnoreCase);
                 StreamReader reader = File.OpenText(fileToParse);
                 String line = reader.ReadLine();
                 while (!String.IsNullOrEmpty(line))
                 {
+                    // don't puke on a mismatch
                     try
                     {
                         Match match = matchString.Match(line);
                         if (match.Success)
                         {
-                            MachineInfo mInfo = new MachineInfo();
-                            mInfo.MACAddress = match.Groups[2].Value;
+                            MachineInfo mInfo = new MachineInfo(match.Groups[2].Value);
                             DateTime.TryParse(match.Groups[3].Value, out mInfo.LastSeen);
                             IPAddress.TryParse(match.Groups[1].Value, out mInfo.LastIP);
                             if (!allMachines.Contains(mInfo))
                             {
-                                //MachineInfo knownBox = knownMachines.Find(delegate(MachineInfo mi) { return mi.MACAddress == mInfo.MACAddress; });
+                                // we can cheat and reuse 'equals' here since the prototype matches what we need in a predicate
                                 MachineInfo knownBox = knownMachines.Find(mInfo.Equals);
                                 if (knownBox != null)
                                 {
@@ -165,6 +173,7 @@ namespace NetgearLogParser
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error reading log", MessageBoxButton.OK, MessageBoxImage.Error);
+                statusText = "Unable to parse logfile";
             }
 
             UpdateMachineList();
@@ -178,6 +187,7 @@ namespace NetgearLogParser
             messages.Clear();
             foreach (MachineInfo mInfo in allMachines)
             {
+                // use the sortable date format here for later
                 messages.Add(String.Format("{0}  {1} -- {2}", mInfo.MACAddress, mInfo.LastSeen.GetDateTimeFormats('u')[0], mInfo.Description));
             }
         }
@@ -231,16 +241,20 @@ namespace NetgearLogParser
         {
             try
             {
-                String storageFile = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sapphire");
-                if (!Directory.Exists(storageFile))
+                // don't bother with this if we didn't mark any as 'known'
+                if (IsDirty)
                 {
-                    Directory.CreateDirectory(storageFile);
+                    String storageFile = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sapphire");
+                    if (!Directory.Exists(storageFile))
+                    {
+                        Directory.CreateDirectory(storageFile);
+                    }
+                    storageFile += "\\KnownMACs.xml";
+                    XmlSerializer ser = new XmlSerializer(knownMachines.GetType());
+                    XmlWriter writer = XmlWriter.Create(storageFile);
+                    ser.Serialize(writer, knownMachines);
+                    writer.Close();
                 }
-                storageFile += "\\KnownMACs.xml";
-                XmlSerializer ser = new XmlSerializer(knownMachines.GetType());
-                XmlWriter writer = XmlWriter.Create(storageFile);
-                ser.Serialize(writer, knownMachines);
-                writer.Close();
             }
             catch (Exception ex)
             {
@@ -275,17 +289,22 @@ namespace NetgearLogParser
                 return;
             }
 
+            // find out who the user thinks this is
             String selectedMAC = messageList.SelectedItem.ToString().Substring(0, 17);
             EditDetails dlg = new EditDetails(selectedMAC);
             dlg.ShowDialog();
             if (dlg.DialogResult.HasValue && dlg.DialogResult.Value)
             {
-                MachineInfo newBox = new MachineInfo();
-                newBox.MACAddress = selectedMAC;
-                MachineInfo foundBox = allMachines.Find(newBox.Equals);
+                // piggyback on this since it matches what we need
+                MachineInfo foundBox = allMachines.Find(new MachineInfo(selectedMAC).Equals);
                 foundBox.Description = dlg.description;
                 knownMachines.Add(foundBox);
+                IsDirty = true;
                 UpdateMachineList();
+
+                // put us back where we were in case someone is using the arrow keys
+                messageList.Focus();
+                messageList.SelectedIndex = allMachines.FindIndex(foundBox.Equals);
             }
         }
     }
