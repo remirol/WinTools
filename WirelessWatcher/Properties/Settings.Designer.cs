@@ -25,7 +25,7 @@ namespace NetgearLogParser.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("IPLog.txt")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string lastUsedLogFile {
             get {
                 return ((string)(this["lastUsedLogFile"]));

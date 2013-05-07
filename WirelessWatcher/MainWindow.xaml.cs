@@ -131,8 +131,19 @@ namespace NetgearLogParser
         {
             try
             {
-                allMachines.Clear();
+                if (String.IsNullOrEmpty(fileToParse))
+                {
+                    statusText = "You need to select an actual logfile to parse first.";
+                    return;
+                }
 
+                if (!File.Exists(fileToParse))
+                {
+                    statusText = "The logfile specified doesn't exist.";
+                    return;
+                }
+
+                allMachines.Clear();
                 // note: this is specific to WNDR4000, should eventually be put into table of routers to select from
                 Regex matchString = new Regex(@"\[DHCP IP: \((.*)\)\] to MAC address ([\d\:abcdef]+), (.*)", RegexOptions.IgnoreCase);
                 StreamReader reader = File.OpenText(fileToParse);
@@ -201,7 +212,10 @@ namespace NetgearLogParser
             dlg.AddExtension = false;
             dlg.CheckFileExists = true;
             dlg.Multiselect = false;
-            dlg.InitialDirectory = System.IO.Path.GetDirectoryName(fileToParse);    // start at the last place we were
+            if (!String.IsNullOrEmpty(fileToParse))
+            {
+                dlg.InitialDirectory = System.IO.Path.GetDirectoryName(fileToParse);    // start at the last place we were
+            }
             dlg.Title = "Select the log file to parse";
             bool? result = dlg.ShowDialog();
             if (result.HasValue && result.Value)
