@@ -34,5 +34,17 @@ namespace WirelessWatcher.Properties {
                 this["lastUsedLogFile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string savedCreds {
+            get {
+                return ((string)(this["savedCreds"]));
+            }
+            set {
+                this["savedCreds"] = value;
+            }
+        }
     }
 }

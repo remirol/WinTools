@@ -76,28 +76,37 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+    <ApplicationDefinition Include="Dialogs\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Dialogs\CredentialsPrompt.xaml.cs">
+      <DependentUpon>CredentialsPrompt.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Log Fetchers\LogFetcher.cs" />
+    <Compile Include="Log Fetchers\NetgearWNDR4000.cs" />
     <Compile Include="UtilityClasses.cs" />
-    <Page Include="EditDetails.xaml">
+    <Page Include="Dialogs\CredentialsPrompt.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Dialogs\EditDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
+    <Compile Include="Dialogs\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EditDetails.xaml.cs">
+    <Compile Include="Dialogs\EditDetails.xaml.cs">
       <DependentUpon>EditDetails.xaml</DependentUpon>
     </Compile>
     <Compile Include="MachineInfo.cs" />
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Dialogs\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
