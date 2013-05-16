@@ -12,11 +12,17 @@ namespace WirelessWatcher.Log_Fetchers
     public class NetgearWNDR4000 : LogFetcher
     {
         const String pageURL = "fwLog.cgi";
+        char[] trailingSlashes = { '/', '\\' };
         String fileToParse = String.Empty;
 
         public NetgearWNDR4000(String file)
         {
-            fileToParse = file;
+            fileToParse = file.Trim().TrimEnd(trailingSlashes);
+            if (!fileToParse.EndsWith(pageURL, StringComparison.InvariantCultureIgnoreCase))
+            {
+                fileToParse = String.Format("{0}/{1}", fileToParse, pageURL);
+            }
+
             if (Settings.Default.savedCreds != null && !String.IsNullOrEmpty(Settings.Default.savedCreds))
             {
                 string[] creds = CrappyCrypt.Decrypt(Settings.Default.savedCreds).Split('|');
@@ -57,6 +63,10 @@ namespace WirelessWatcher.Log_Fetchers
             get { return _loginCredentials; }
         }
 
+        /// <summary>
+        /// Connects to the router at the address specified and fetches the log
+        /// </summary>
+        /// <returns>Whether the fetch was successful</returns>
         public override bool Fetch()
         {
             bool success = false;
@@ -102,6 +112,10 @@ namespace WirelessWatcher.Log_Fetchers
             return success;
         }
 
+        /// <summary>
+        /// Prompts the user for the login/pass necessary (WNDR routers need it)
+        /// </summary>
+        /// <returns>Whether the user clicked OK</returns>
         public override bool PromptCredentials()
         {
             CredentialsPrompt credDlg = new CredentialsPrompt();

@@ -105,13 +105,15 @@ namespace WirelessWatcher
 
         #endregion
 
-        #region Events
+        #region Events, Timers
 
         /// <summary>
         /// Triggers when an "Unknown" MAC address is detected
         /// </summary>
         public event AlertRaisedEventHandler AlertRaised;
         public delegate void AlertRaisedEventHandler(object sender, AlertEventArgs e);
+
+        private SWF.Timer refreshTimer;
 
         #endregion
 
@@ -127,8 +129,22 @@ namespace WirelessWatcher
             fileToParse = Settings.Default.lastUsedLogFile;
             IsDirty = false;
 
+            refreshTimer = new SWF.Timer();
+            refreshTimer.Interval = 3600 * 1000;    // value in ms; start from every hour
+            refreshTimer.Tick += new EventHandler(refreshTimer_Tick);
+            refreshTimer.Enabled = true;
+            refreshTimer.Start();
+
             ReadKnownMachines();
             BuildTrayIcon();
+        }
+
+        /// <summary>
+        /// reread log on every tick
+        /// </summary>
+        void refreshTimer_Tick(object sender, EventArgs e)
+        {
+            ParseLog();
         }
 
         /// <summary>
@@ -262,7 +278,7 @@ namespace WirelessWatcher
                             messages.Add(ex.Message);
                         }
                     }
-                    statusText = "Logfile loaded successfully.";
+                    statusText = String.Format("Logfile loaded successfully; last update {0}.", DateTime.Now.GetDateTimeFormats('u')[0]);
                 }
                 else
                 {
