@@ -23,6 +23,8 @@ using System.Xml;
 using SWF = System.Windows.Forms;
 using System.Reflection;
 using WirelessWatcher.Log_Fetchers;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace WirelessWatcher
 {
@@ -117,6 +119,21 @@ namespace WirelessWatcher
 
         #endregion
 
+        #region DLLImports
+
+        private const int SW_RESTORE = 9;
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private void RestoreWindow()
+        {
+            this.Visibility = Visibility.Visible;
+            ShowWindow(new WindowInteropHelper(this).Handle, SW_RESTORE);
+        }
+
+        #endregion
+
         public MainWindow()
         {
             InitializeComponent();
@@ -188,25 +205,21 @@ namespace WirelessWatcher
         void trayIcon_BalloonTipClicked(object sender, EventArgs e)
         {
             // always display the app if the user is clicking our warning
-            this.WindowState = WindowState.Normal;
-            this.Visibility = Visibility.Visible;
+            RestoreWindow();
+            this.Focus();
         }
 
         void trayIcon_Click(object sender, EventArgs e)
         {
-            switch (this.Visibility)
+            if (this.WindowState == System.Windows.WindowState.Minimized || this.Visibility == Visibility.Hidden)
             {
-                case Visibility.Collapsed:
-                    this.Visibility = Visibility.Hidden;
-                    break;
-                case Visibility.Hidden:
-                    // at least here, try to restore the damn thing
-                    this.WindowState = WindowState.Normal;
-                    this.Visibility = Visibility.Visible;
-                    break;
-                case Visibility.Visible:
-                    this.Visibility = Visibility.Hidden;
-                    break;
+                RestoreWindow();
+                this.Focus();
+            }
+            else
+            {
+                this.WindowState = System.Windows.WindowState.Minimized;
+                this.Visibility = System.Windows.Visibility.Hidden;
             }
         }
 
@@ -425,6 +438,14 @@ namespace WirelessWatcher
                 // put us back where we were in case someone is using the arrow keys
                 messageList.Focus();
                 messageList.SelectedIndex = allMachines.FindIndex(foundBox.Equals);
+            }
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == System.Windows.WindowState.Minimized)
+            {
+                this.Visibility = Visibility.Hidden;
             }
         }
     }
