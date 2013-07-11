@@ -1,0 +1,19 @@
+﻿<Window x:Class="CribbageAI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cribbage AI/probabilities" 
+        SizeToContent="WidthAndHeight" 
+        MinHeight="200" 
+        MinWidth="600"
+        Loaded="Window_Loaded"
+        WindowStartupLocation="CenterOwner"
+        >
+    <DockPanel LastChildFill="False">
+        <ListBox Name="logWindow" DockPanel.Dock="Right" Width="300" ItemsSource="{Binding Path=logMessages}"></ListBox>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="opposingHand" MinHeight="80"></StackPanel>
+        <ListBox Name="opponentScore" DockPanel.Dock="Top" MinHeight="80"></ListBox>
+        <Button Name="deal" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20,10,0,10" Height="30" Width="50" Click="deal_Click">Deal</Button>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Left" Name="playerHand" MinHeight="80"></StackPanel>
+        <ListBox Name="playerScore" DockPanel.Dock="Bottom" MinHeight="80"></ListBox>
+    </DockPanel>
+</Window>
