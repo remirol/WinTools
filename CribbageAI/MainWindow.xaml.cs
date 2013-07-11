@@ -34,6 +34,8 @@ namespace CribbageAI
 
         #endregion
 
+        #region Variables
+
         private Deck deck;
         public Random generator;   // it stays here so everything uses the same one
 
@@ -41,9 +43,7 @@ namespace CribbageAI
 
         private List<Card> yourHand;
         private List<Card> theirHand;
-
-        private Score yourScore;
-        private Score theirScore;
+        private Card upcard;
 
         private ObservableCollection<String> _messages;
         public ObservableCollection<String> logMessages
@@ -51,38 +51,13 @@ namespace CribbageAI
             get { return _messages; }
             set { _messages = value; Notify("logMessages"); }
         }
-        
+
+        #endregion
+
         public MainWindow()
         {
             InitializeComponent();
             _messages = new ObservableCollection<string>();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            generator = new Random((int)DateTime.Now.Ticks);
-            deck = new Deck(generator);
-            DataContext = this;
-        }
-
-        private void GenerateScore(List<Card> hand, ListBox box, ref Score score)
-        {
-            int points = 0;
-            Scorer scorer = new Scorer();
-
-            score = scorer.ScoreHand(hand);
-            box.Items.Add(String.Format("fifteens: {0}", score.fifteens));
-            box.Items.Add(String.Format("pairs: {0}", score.pairs));
-            foreach (int key in score.runs.Keys)
-            {
-                if (score.runs[key] > 0)
-                {
-                    box.Items.Add(String.Format("runs of {0}: {1}", key, score.runs[key]));
-                    points += score.runs[key] * key;
-                }
-            }
-            points += (score.fifteens + score.pairs) * 2;
-            box.Items.Add(String.Format("total score: {0}", points));
         }
 
         private Label MakeLabelFromCard(Card card)
@@ -95,6 +70,15 @@ namespace CribbageAI
             return lbl;
         }
 
+        #region Events
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            generator = new Random((int)DateTime.Now.Ticks);
+            deck = new Deck(generator);
+            DataContext = this;
+        }
+
         private void deal_Click(object sender, RoutedEventArgs e)
         {
             deck.Shuffle();
@@ -102,21 +86,96 @@ namespace CribbageAI
             opponentScore.Items.Clear();
             playerHand.Children.Clear();
             opposingHand.Children.Clear();
+            logMessages.Clear();
+            if (upcardPanel.Children.Count > 2)
+            {
+                upcardPanel.Children.RemoveAt(0);
+            }
 
-            yourHand = deck.Deal(4);
+            yourHand = deck.Deal(6);
             foreach (Card card in yourHand)
             {
                 playerHand.Children.Add(MakeLabelFromCard(card));
             }
-            GenerateScore(yourHand, playerScore, ref yourScore);
 
-            theirHand = deck.Deal(4);
+            theirHand = deck.Deal(6);
             foreach (Card card in theirHand)
             {
                 opposingHand.Children.Add(MakeLabelFromCard(card));
             }
-            GenerateScore(theirHand, opponentScore, ref theirScore);
+
+            upcard = deck.Deal();
         }
+
+        private void eval_Click(object sender, RoutedEventArgs e)
+        {
+            List<String> seenCombinations = new List<String>();
+            Dictionary<String, double> handRanks = new Dictionary<String, double>();
+            Scorer scorer = new Scorer();
+
+            // we need to remove two cards each time, so...
+            for (int i = 0; i < yourHand.Count; i++)
+            {
+                List<Card> tempFive = new List<Card>(yourHand);
+                tempFive.RemoveAt(i);
+                for (int j = 0; j < tempFive.Count; j++)
+                {
+                    List<Card> tempFour = new List<Card>(tempFive);
+                    tempFour.RemoveAt(j);
+
+                    // make sure we aren't doing one we've already done
+                    StringBuilder sb = new StringBuilder();
+                    tempFour.Sort();
+                    foreach (Card card in tempFour)
+                    {
+                        sb.Append(card.ToShortString());
+                    }
+                    String handOption = sb.ToString();
+                    if (!seenCombinations.Contains(handOption))
+                    {
+                        seenCombinations.Add(handOption);
+
+                        // now, we need to evaluate this combination for all 13 possible upcard ranks
+                        // and store the average score improvement in our ranking list
+                        handRanks[handOption] = 0.0;
+                        int[] tempScores = new int[13];
+                        for (int k = 0; k < 13; k++)
+                        {
+                            // EXCEPT in one case: if we have 12 pairs, that means we have quads
+                            // and it's not possible to get a fifth of that rank, so mark it zero
+                            Score quads = scorer.ScoreHand(tempFour);
+                            if (quads.pairs != 12)
+                            {
+                                List<Card> tempHand = new List<Card>(tempFour);
+                                tempHand.Add(new Card(k + 1, 1));
+                                Score tempScore = scorer.ScoreHand(tempHand);
+                                tempScores[k] = tempScore.totalScore;
+                            }
+                            else
+                            {
+                                // it can't get any better so treat it as if we got a card that added nothing
+                                // so we don't vaporize the average
+                                tempScores[k] = quads.totalScore;
+                            }
+                        }
+                        // record it and move on
+                        handRanks[handOption] = tempScores.ToList().Average();
+
+                        // show us where we'd have been compared to the actual upcard
+                        List<Card> finalHand = new List<Card>(tempFour);
+                        finalHand.Add(upcard);
+                        Score finalScore = scorer.ScoreHand(finalHand);
+                        logMessages.Add(String.Format("Hand: {0}  Average EV: {1}  Actual: {2}",
+                            handOption, handRanks[handOption].ToString("F2"), finalScore.totalScore));
+                    }
+                }
+            }
+
+            // and actually show the card here
+            upcardPanel.Children.Insert(0, MakeLabelFromCard(upcard));
+        }
+
+        #endregion
 
     }
 }

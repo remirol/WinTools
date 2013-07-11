@@ -10,14 +10,16 @@ namespace CribbageAI
     {
         public Score()
         {
-            fifteens = pairs = 0;
+            fifteens = pairs = totalScore = 0;
             runs = new Dictionary<int, int>();
+            flushes = new Dictionary<int, int>();
         }
 
         public int fifteens;
         public int pairs;
-        public int flushCount;
+        public Dictionary<int, int> flushes;
         public Dictionary<int, int> runs;
+        public int totalScore;
     }
 
     public class Scorer
@@ -37,7 +39,40 @@ namespace CribbageAI
         public Score ScoreHand(List<Card> cards)
         {
             seenCombinations.Clear();
-            return ScoreUnit(cards);
+            Score score = ScoreUnit(cards);
+
+            // a tiny bit of housekeeping before we hand it back; 
+            // a run of X is not two runs of X-1, nor is a flush of X also a flush of X-1
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (score.runs[i] > 0)
+                {
+                    score.runs[i - 1] = 0;
+                }
+                if (score.flushes[i] > 0)
+                {
+                    score.flushes[i - 1] = 0;
+                }
+            }
+
+            // and do up the total score
+            foreach (int key in score.runs.Keys)
+            {
+                if (score.runs[key] > 0)
+                {
+                    score.totalScore += score.runs[key] * key;
+                }
+            }
+            foreach (int key in score.flushes.Keys)
+            {
+                if (score.flushes[key] > 0 && key > 3)
+                {
+                    score.totalScore += key;
+                }
+            }
+            score.totalScore += (score.fifteens + score.pairs) * 2;
+
+            return score;
         }
 
         private Score ScoreUnit(List<Card> cards)
@@ -48,6 +83,7 @@ namespace CribbageAI
             for (int i = 0; i <= cards.Count; i++)
             {
                 partialScore.runs[i] = 0;
+                partialScore.flushes[i] = 0;
             }
 
             // nothing further to score, so just return our zeroes
@@ -110,10 +146,23 @@ namespace CribbageAI
                 bool bFlush = true;
                 for (int i = 0; i < cards.Count - 1; i++)
                 {
-                    // don't forget that aces can be high or low
-                    if (cards[i + 1].Rank != cards[i].Rank + 1 || (cards[i].Rank == 13 && cards[i + 1].Rank == 1))
+                    // easy enough here, but...
+                    if (cards[i + 1].Rank != cards[i].Rank + 1)
                     {
-                        bLongRun = false;
+                        if (cards[i].Rank != 1)
+                        {
+                            // if this wasn't an ace then it's always false
+                            bLongRun = false;
+                        }
+                        else
+                        {
+                            // but aces are high too -- so we might see AQK, AJQK, or ATJQK
+                            // and we should catch the wraparound here if so (but we HAVE to have QKA at least)
+                            if (cards[cards.Count - 1].Rank != 13 || cards[cards.Count - 2].Rank != 12)
+                            {
+                                bLongRun = false;
+                            }
+                        }
                     }
 
                     // might as well check flushes while we're here
@@ -123,15 +172,16 @@ namespace CribbageAI
                     }
                 }
 
+                // did we come out of the loop all run together?
                 if (bLongRun)
                 {
                     partialScore.runs[cards.Count] += 1;
                 }
 
                 // only 4s and 5s count
-                if (bFlush && (cards.Count == 4 || cards.Count == 5))
+                if (bFlush)
                 {
-                    partialScore.flushCount = cards.Count;
+                    partialScore.flushes[cards.Count] += 1;
                 }
             }
             

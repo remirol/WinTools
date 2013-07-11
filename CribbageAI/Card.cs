@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace CribbageAI
 {
-    public class Card : INotifyPropertyChanged, IComparable
+    public class Card : INotifyPropertyChanged, IComparable, IEquatable<Card>
     {
         #region INotifyPropertyChanged Members
 
@@ -38,6 +38,17 @@ namespace CribbageAI
         }
 
         #endregion
+
+        #region IEquatable<Card> Members
+
+        public bool Equals(Card other)
+        {
+            return (this.Rank == other.Rank && this.Suit == other.Suit);
+        }
+
+        #endregion
+
+        #region Properties
 
         public String[] CardNames = { "ERROR", "Ace", "Two", "Three", "Four", 
                                         "Five", "Six", "Seven", "Eight", "Nine", 
@@ -74,6 +85,8 @@ namespace CribbageAI
             get { return _frontPicture; }
             set { _frontPicture = value; Notify("FrontPicture"); }
         }
+
+        #endregion
 
         public Card(int rank, int suit, Image image) : this(rank, suit)
         {

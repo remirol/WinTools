@@ -11,9 +11,12 @@
     <DockPanel LastChildFill="False">
         <ListBox Name="logWindow" DockPanel.Dock="Right" Width="300" ItemsSource="{Binding Path=logMessages}"></ListBox>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="opposingHand" MinHeight="80"></StackPanel>
-        <ListBox Name="opponentScore" DockPanel.Dock="Top" MinHeight="80"></ListBox>
-        <Button Name="deal" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20,10,0,10" Height="30" Width="50" Click="deal_Click">Deal</Button>
+        <ListBox Name="opponentScore" DockPanel.Dock="Top" MinHeight="100"></ListBox>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="upcardPanel">
+            <Button Name="deal" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20,10" Height="30" Width="60" Click="deal_Click">Deal</Button>
+            <Button Name="eval" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="0,10" Height="30" Width="60" Click="eval_Click">Evaluate</Button>
+        </StackPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Left" Name="playerHand" MinHeight="80"></StackPanel>
-        <ListBox Name="playerScore" DockPanel.Dock="Bottom" MinHeight="80"></ListBox>
+        <ListBox Name="playerScore" DockPanel.Dock="Bottom" MinHeight="100"></ListBox>
     </DockPanel>
 </Window>
