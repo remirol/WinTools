@@ -13,6 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace CribbageAI
 {
@@ -60,14 +62,22 @@ namespace CribbageAI
             _messages = new ObservableCollection<string>();
         }
 
-        private Label MakeLabelFromCard(Card card)
+
+        private Image MakeImageFromCard(Card card, bool faceUp = true)
         {
-            Label lbl = new Label();
-            lbl.FontFamily = labelFont;
-            lbl.FontSize = 24;
-            lbl.FontWeight = FontWeights.Bold;
-            lbl.Content = card.ToShortString();
-            return lbl;
+            Image img = new Image();
+            if (faceUp)
+            {
+                img.Source = card.FrontPicture;
+            }
+            else
+            {
+                img.Source = deck.BackPicture;
+            }
+            img.Width = card.FrontPicture.PixelWidth;
+            img.Height = card.FrontPicture.PixelHeight;
+            img.Margin = new Thickness(5);
+            return img;
         }
 
         #region Events
@@ -95,22 +105,21 @@ namespace CribbageAI
             yourHand = deck.Deal(6);
             foreach (Card card in yourHand)
             {
-                playerHand.Children.Add(MakeLabelFromCard(card));
+                playerHand.Children.Add(MakeImageFromCard(card));
             }
 
             theirHand = deck.Deal(6);
             foreach (Card card in theirHand)
             {
-                opposingHand.Children.Add(MakeLabelFromCard(card));
+                opposingHand.Children.Add(MakeImageFromCard(card, false));
             }
-
             upcard = deck.Deal();
         }
 
         private void eval_Click(object sender, RoutedEventArgs e)
         {
             List<String> seenCombinations = new List<String>();
-            Dictionary<String, double> handRanks = new Dictionary<String, double>();
+            Dictionary<String, EvalScore> handRanks = new Dictionary<String, EvalScore>();
             Scorer scorer = new Scorer();
 
             // we need to remove two cards each time, so...
@@ -128,7 +137,7 @@ namespace CribbageAI
                     tempFour.Sort();
                     foreach (Card card in tempFour)
                     {
-                        sb.Append(card.ToShortString());
+                        sb.Append(card.ToShortString() + " ");
                     }
                     String handOption = sb.ToString();
                     if (!seenCombinations.Contains(handOption))
@@ -137,42 +146,44 @@ namespace CribbageAI
 
                         // now, we need to evaluate this combination for all 13 possible upcard ranks
                         // and store the average score improvement in our ranking list
-                        handRanks[handOption] = 0.0;
-                        int[] tempScores = new int[13];
+                        handRanks[handOption] = new EvalScore();
+                        handRanks[handOption].scoredHand = new List<Card>(tempFour);
                         for (int k = 0; k < 13; k++)
                         {
                             // EXCEPT in one case: if we have 12 pairs, that means we have quads
                             // and it's not possible to get a fifth of that rank, so mark it zero
                             Score quads = scorer.ScoreHand(tempFour);
-                            if (quads.pairs != 12)
+                            if (quads.pairs != 6)
                             {
                                 List<Card> tempHand = new List<Card>(tempFour);
-                                tempHand.Add(new Card(k + 1, 1));
+                                tempHand.Add(new Card(k + 1, 5));
                                 Score tempScore = scorer.ScoreHand(tempHand);
-                                tempScores[k] = tempScore.totalScore;
+                                handRanks[handOption].Scores[k] = tempScore.totalScore;
                             }
                             else
                             {
                                 // it can't get any better so treat it as if we got a card that added nothing
                                 // so we don't vaporize the average
-                                tempScores[k] = quads.totalScore;
+                                handRanks[handOption].Scores[k] = quads.totalScore;
                             }
                         }
-                        // record it and move on
-                        handRanks[handOption] = tempScores.ToList().Average();
-
-                        // show us where we'd have been compared to the actual upcard
-                        List<Card> finalHand = new List<Card>(tempFour);
-                        finalHand.Add(upcard);
-                        Score finalScore = scorer.ScoreHand(finalHand);
-                        logMessages.Add(String.Format("Hand: {0}  Average EV: {1}  Actual: {2}",
-                            handOption, handRanks[handOption].ToString("F2"), finalScore.totalScore));
                     }
                 }
             }
 
+            // show us where we'd have been compared to the actual upcard
+            foreach (String cards in handRanks.Keys)
+            {
+                List<Card> finalHand = new List<Card>(handRanks[cards].scoredHand);
+                finalHand.Add(upcard);
+                logMessages.Add(String.Format("Hand: {0}  High: {1} ({2})  Low: {3} ({4})  Expected: {5}  Potential: {6}  Actual: {7}  ",
+                    cards, handRanks[cards].High, new Card(handRanks[cards].HighIndex + 1, 5).ToShortString(), handRanks[cards].Low, 
+                    new Card(handRanks[cards].LowIndex + 1, 5).ToShortString(), handRanks[cards].Average.ToString("F2"), 
+                    handRanks[cards].PctOfHigh.ToString("P"), scorer.ScoreHand(finalHand).totalScore));
+            }
+
             // and actually show the card here
-            upcardPanel.Children.Insert(0, MakeLabelFromCard(upcard));
+            upcardPanel.Children.Insert(0, MakeImageFromCard(upcard));
         }
 
         #endregion

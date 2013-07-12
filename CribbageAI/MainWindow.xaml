@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterOwner"
         >
     <DockPanel LastChildFill="False">
-        <ListBox Name="logWindow" DockPanel.Dock="Right" Width="300" ItemsSource="{Binding Path=logMessages}"></ListBox>
+        <ListBox Name="logWindow" DockPanel.Dock="Right" MinWidth="300" MaxHeight="400" ItemsSource="{Binding Path=logMessages}"></ListBox>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="opposingHand" MinHeight="80"></StackPanel>
         <ListBox Name="opponentScore" DockPanel.Dock="Top" MinHeight="100"></ListBox>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="upcardPanel">

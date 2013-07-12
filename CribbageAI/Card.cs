@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
-using System.Drawing;
+using System.Windows.Media.Imaging;
 
 namespace CribbageAI
 {
@@ -53,7 +53,7 @@ namespace CribbageAI
         public String[] CardNames = { "ERROR", "Ace", "Two", "Three", "Four", 
                                         "Five", "Six", "Seven", "Eight", "Nine", 
                                         "Ten", "Jack", "Queen", "King" };
-        public String[] CardSuits = { "ERROR", "Clubs", "Diamonds", "Hearts", "Spades" };
+        public String[] CardSuits = { "ERROR", "Clubs", "Diamonds", "Hearts", "Spades", "Any" };
 
         private int _rank;
         public int Rank
@@ -79,8 +79,8 @@ namespace CribbageAI
             }
         }
 
-        private Image _frontPicture;
-        public Image FrontPicture
+        private BitmapSource _frontPicture;
+        public BitmapSource FrontPicture
         {
             get { return _frontPicture; }
             set { _frontPicture = value; Notify("FrontPicture"); }
@@ -88,7 +88,8 @@ namespace CribbageAI
 
         #endregion
 
-        public Card(int rank, int suit, Image image) : this(rank, suit)
+        public Card(int rank, int suit, BitmapSource image)
+            : this(rank, suit)
         {
             _frontPicture = image;
         }
@@ -112,7 +113,7 @@ namespace CribbageAI
         /// </summary>
         public string ToShortString()
         {
-            return String.Format("{0}{1}", "0A23456789TJQK".Substring(_rank, 1), "0CDHS".Substring(_suit, 1));
+            return String.Format("{0}{1}", "0A23456789TJQK".Substring(_rank, 1), "0CDHSx".Substring(_suit, 1));
         }
 
     }

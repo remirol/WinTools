@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
-using System.Drawing;
+using System.Windows.Media.Imaging;
+using System.Diagnostics;
 
 namespace CribbageAI
 {
@@ -22,8 +23,8 @@ namespace CribbageAI
 
         #endregion
 
-        private Image _backPicture;
-        public Image BackPicture
+        private BitmapSource _backPicture;
+        public BitmapSource BackPicture
         {
             get { return _backPicture; }
             set { _backPicture = value; Notify("BackPicture"); }
@@ -38,18 +39,7 @@ namespace CribbageAI
         private List<Card> orderedList;
         private Random generator;
 
-        private void FillDeck()
-        {
-            // fill the base deck we have to work with
-            orderedList.Clear();
-            for (int suit = 1; suit < 5; suit++)
-            {
-                for (int rank = 1; rank < 14; rank++)
-                {
-                    orderedList.Add(new Card(rank, suit));
-                }
-            }
-        }
+        private BitmapSource allCards;
 
         /// <summary>
         /// Create a new deck with an internal RNG
@@ -65,10 +55,49 @@ namespace CribbageAI
         public Deck(Random gen)
         {
             generator = gen;
-
             _cards = new List<Card>();
             orderedList = new List<Card>();
-            FillDeck();
+
+            String workingDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            allCards = new BitmapImage(new Uri(System.IO.Path.Combine(workingDir, "cards.png")));
+
+            FillDeck(true);
+        }
+
+        private void FillDeck(bool useImages)
+        {
+            // fill the base deck we have to work with
+            orderedList.Clear();
+            for (int suit = 1; suit < 5; suit++)
+            {
+                for (int rank = 1; rank < 14; rank++)
+                {
+                    if (useImages)
+                    {
+                        int cardWidth = allCards.PixelWidth / 13;
+                        int cardHeight = allCards.PixelHeight / 5;
+                        int cardX = cardWidth * (rank - 1);
+                        int cardY = cardHeight * (suit - 1);
+                        System.Windows.Int32Rect rect = new System.Windows.Int32Rect(cardX, cardY, cardWidth, cardHeight);
+                        CroppedBitmap subCard = new CroppedBitmap(allCards, rect);
+                        orderedList.Add(new Card(rank, suit, subCard));
+
+                        // do the backing if this is the first time through (no need to do it every time)
+                        if (rank == 1 && suit == 1)
+                        {
+                            // we know where our 'back' card is
+                            rect.X = cardWidth * 2;
+                            rect.Y = cardHeight * 4;
+                            _backPicture = new CroppedBitmap(allCards, rect);
+                        }
+                    }
+                    else
+                    {
+                        orderedList.Add(new Card(rank, suit));
+                    }
+
+                }
+            }
         }
 
         /// <summary>
@@ -77,7 +106,7 @@ namespace CribbageAI
         public void Shuffle()
         {
             _cards.Clear();
-            FillDeck();
+            FillDeck(true);
 
             for (int i = 0; i < 52; i++)
             {
