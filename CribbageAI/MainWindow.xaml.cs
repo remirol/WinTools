@@ -159,18 +159,17 @@ namespace CribbageAI
             }
 
             // show us all our evaluations
-            List<EvalScore> tempList = new List<EvalScore>();
-            foreach (String cards in handRanks.Keys)
-            {
-                List<Card> finalHand = new List<Card>(handRanks[cards].scoredHand);
-                finalHand.Add(upcard);
-                tempList.Add(handRanks[cards]);
-            }
+            List<EvalScore> tempList = new List<EvalScore>(handRanks.Values);
             tempList.Sort();
             tempList.Reverse();
             evaluations = new ObservableCollection<EvalScore>(tempList);
             upcardFront.Visibility = Visibility.Visible;
             eval.IsEnabled = false;
+        }
+
+        private void exit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         #endregion

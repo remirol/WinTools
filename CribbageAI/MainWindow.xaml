@@ -6,6 +6,7 @@
         MinHeight="600" 
         MinWidth="900"
         Loaded="Window_Loaded"
+        Icon="cards.ico"
         WindowStartupLocation="CenterScreen"        
         >
     <!-- pull in our crap from here -->
@@ -20,6 +21,7 @@
     <DockPanel LastChildFill="False">
         <ListBox DockPanel.Dock="Right" Name="evaluationList" MinWidth="400" MaxHeight="600"
                  ItemsSource="{Binding Path=evaluations}" ItemTemplate="{StaticResource evalTemplate}"></ListBox>
+        
         <ItemsControl Name="opposingHand" DockPanel.Dock="Top" MinWidth="540" MinHeight="140" HorizontalAlignment="Left"
                       ItemsSource="{Binding Path=theirHand}" ItemTemplate="{StaticResource faceDownCard}" Template="{StaticResource itemsControlDefault}">
             <ItemsControl.ItemsPanel>
@@ -33,6 +35,7 @@
         <DockPanel LastChildFill="False" DockPanel.Dock="Top" HorizontalAlignment="Right" Name="upcardPanel" MinHeight="130" MinWidth="540">
             <Image Name="upcardBack" Source="{Binding Path=upcard.BackPicture}" DockPanel.Dock="Left" Width="100" Height="130" />
             <Image Name="upcardFront" Source="{Binding Path=upcard.FrontPicture}" DockPanel.Dock="Left" Width="100" Height="130" />
+            <Button Name="exit" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="exit_Click">Exit</Button>
             <Button Name="eval" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="eval_Click">Evaluate</Button>
             <Button Name="deal" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="deal_Click">Deal</Button>
         </DockPanel>
@@ -46,5 +49,6 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
         <ListBox Name="playerScore" DockPanel.Dock="Bottom" MinHeight="100"></ListBox>
+        
     </DockPanel>
 </Window>
