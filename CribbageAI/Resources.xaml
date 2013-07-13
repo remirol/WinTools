@@ -1,0 +1,76 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- gets our thumbnail bitmaps into an 'image' control -->
+    <DataTemplate x:Key="smallCard" DataType="local:Card">
+        <Image Source="{Binding Path=SmallPicture}" Margin="5,0"/>
+    </DataTemplate>
+
+    <!-- and our normal bitmaps -->
+    <DataTemplate x:Key="normalCard" DataType="local:Card">
+        <Image Source="{Binding Path=FrontPicture}" Width="{Binding Path=FrontPicture.PixelWidth}" Height="{Binding Path=FrontPicture.PixelHeight}" Margin="5,0"/>
+    </DataTemplate>
+
+    <!-- and our face down bitmaps -->
+    <DataTemplate x:Key="faceDownCard" DataType="local:Card">
+        <Image Source="{Binding Path=BackPicture}" Width="{Binding Path=BackPicture.PixelWidth}" Height="{Binding Path=BackPicture.PixelHeight}" Margin="5,0"/>
+    </DataTemplate>
+
+    <!-- we need a generic one in a few places since we use horizontal lists -->
+    <ControlTemplate x:Key="itemsControlDefault" TargetType="ItemsControl">
+        <ItemsPresenter />
+    </ControlTemplate>
+
+    <!-- handles making our evaluations not inherently ugly-->
+    <DataTemplate x:Key="evalTemplate" DataType="local:EvalScore">
+        <DataTemplate.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Miriam Fixed" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+        </DataTemplate.Resources>
+        <StackPanel Orientation="Horizontal" Margin="0,5">
+            <StackPanel Orientation="Horizontal">
+                <ItemsControl ItemsSource="{Binding Path=scoredHand}" ItemTemplate="{StaticResource smallCard}" Template="{StaticResource itemsControlDefault}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}Expected: {0:F2}   ">
+                                <Binding Path="Average" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                </TextBlock>
+                <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}High: {0}">
+                                <Binding Path="High" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                </TextBlock>
+                <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}Low: {0}">
+                                <Binding Path="Low" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                </TextBlock>
+                <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}Gain: {0:F2}">
+                                <Binding Path="PotentialGain" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+
+</ResourceDictionary>

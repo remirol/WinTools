@@ -41,17 +41,32 @@ namespace CribbageAI
         private Deck deck;
         public Random generator;   // it stays here so everything uses the same one
 
-        private FontFamily labelFont = new FontFamily("Miriam Fixed");
-
-        private List<Card> yourHand;
-        private List<Card> theirHand;
-        private Card upcard;
-
-        private ObservableCollection<String> _messages;
-        public ObservableCollection<String> logMessages
+        private ObservableCollection<Card> _yourHand;
+        public ObservableCollection<Card> yourHand
         {
-            get { return _messages; }
-            set { _messages = value; Notify("logMessages"); }
+            get { return _yourHand; }
+            set { _yourHand = value; Notify("yourHand"); }
+        }
+
+        private ObservableCollection<Card> _theirHand;
+        public ObservableCollection<Card> theirHand
+        {
+            get { return _theirHand; }
+            set { _theirHand = value; Notify("theirHand"); }
+        }
+
+        private Card _upcard;
+        public Card upcard
+        {
+            get { return _upcard; }
+            set { _upcard = value; Notify("upcard"); }
+        }
+
+        private ObservableCollection<EvalScore> _evaluations;
+        public ObservableCollection<EvalScore> evaluations
+        {
+            get { return _evaluations; }
+            set { _evaluations = value; Notify("evaluations"); }
         }
 
         #endregion
@@ -59,25 +74,7 @@ namespace CribbageAI
         public MainWindow()
         {
             InitializeComponent();
-            _messages = new ObservableCollection<string>();
-        }
-
-
-        private Image MakeImageFromCard(Card card, bool faceUp = true)
-        {
-            Image img = new Image();
-            if (faceUp)
-            {
-                img.Source = card.FrontPicture;
-            }
-            else
-            {
-                img.Source = deck.BackPicture;
-            }
-            img.Width = card.FrontPicture.PixelWidth;
-            img.Height = card.FrontPicture.PixelHeight;
-            img.Margin = new Thickness(5);
-            return img;
+            evaluations = new ObservableCollection<EvalScore>();
         }
 
         #region Events
@@ -87,6 +84,9 @@ namespace CribbageAI
             generator = new Random((int)DateTime.Now.Ticks);
             deck = new Deck(generator);
             DataContext = this;
+            eval.IsEnabled = false;
+            upcardFront.Visibility = Visibility.Hidden;
+            upcardBack.Visibility = Visibility.Hidden;
         }
 
         private void deal_Click(object sender, RoutedEventArgs e)
@@ -94,26 +94,13 @@ namespace CribbageAI
             deck.Shuffle();
             playerScore.Items.Clear();
             opponentScore.Items.Clear();
-            playerHand.Children.Clear();
-            opposingHand.Children.Clear();
-            logMessages.Clear();
-            if (upcardPanel.Children.Count > 2)
-            {
-                upcardPanel.Children.RemoveAt(0);
-            }
-
-            yourHand = deck.Deal(6);
-            foreach (Card card in yourHand)
-            {
-                playerHand.Children.Add(MakeImageFromCard(card));
-            }
-
-            theirHand = deck.Deal(6);
-            foreach (Card card in theirHand)
-            {
-                opposingHand.Children.Add(MakeImageFromCard(card, false));
-            }
+            evaluations.Clear();
+            upcardFront.Visibility = Visibility.Hidden;
+            upcardBack.Visibility = Visibility.Visible;
+            yourHand = new ObservableCollection<Card>(deck.Deal(6));
+            theirHand = new ObservableCollection<Card>(deck.Deal(6));
             upcard = deck.Deal();
+            eval.IsEnabled = true;
         }
 
         private void eval_Click(object sender, RoutedEventArgs e)
@@ -147,7 +134,7 @@ namespace CribbageAI
                         // now, we need to evaluate this combination for all 13 possible upcard ranks
                         // and store the average score improvement in our ranking list
                         handRanks[handOption] = new EvalScore();
-                        handRanks[handOption].scoredHand = new List<Card>(tempFour);
+                        handRanks[handOption].scoredHand = new ObservableCollection<Card>(tempFour);
                         for (int k = 0; k < 13; k++)
                         {
                             // EXCEPT in one case: if we have 12 pairs, that means we have quads
@@ -171,19 +158,19 @@ namespace CribbageAI
                 }
             }
 
-            // show us where we'd have been compared to the actual upcard
+            // show us all our evaluations
+            List<EvalScore> tempList = new List<EvalScore>();
             foreach (String cards in handRanks.Keys)
             {
                 List<Card> finalHand = new List<Card>(handRanks[cards].scoredHand);
                 finalHand.Add(upcard);
-                logMessages.Add(String.Format("Hand: {0}  High: {1} ({2})  Low: {3} ({4})  Expected: {5}  Potential: {6}  Actual: {7}  ",
-                    cards, handRanks[cards].High, new Card(handRanks[cards].HighIndex + 1, 5).ToShortString(), handRanks[cards].Low, 
-                    new Card(handRanks[cards].LowIndex + 1, 5).ToShortString(), handRanks[cards].Average.ToString("F2"), 
-                    handRanks[cards].PctOfHigh.ToString("P"), scorer.ScoreHand(finalHand).totalScore));
+                tempList.Add(handRanks[cards]);
             }
-
-            // and actually show the card here
-            upcardPanel.Children.Insert(0, MakeImageFromCard(upcard));
+            tempList.Sort();
+            tempList.Reverse();
+            evaluations = new ObservableCollection<EvalScore>(tempList);
+            upcardFront.Visibility = Visibility.Visible;
+            eval.IsEnabled = false;
         }
 
         #endregion

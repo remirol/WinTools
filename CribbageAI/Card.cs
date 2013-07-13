@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using System.Windows.Controls;
 
 namespace CribbageAI
 {
@@ -56,17 +58,26 @@ namespace CribbageAI
         public String[] CardSuits = { "ERROR", "Clubs", "Diamonds", "Hearts", "Spades", "Any" };
 
         private int _rank;
+        /// <summary>
+        /// Numeric rank of this card
+        /// </summary>
         public int Rank
         {
             get { return _rank; }
         }
 
         private int _suit;
+        /// <summary>
+        /// Numeric suit of this card
+        /// </summary>
         public int Suit
         {
             get { return _suit; }
         }
 
+        /// <summary>
+        /// Numeric value of this card; aces are worth 1 and face cards are worth 10
+        /// </summary>
         public int Value
         {
             get
@@ -79,6 +90,9 @@ namespace CribbageAI
             }
         }
 
+        /// <summary>
+        /// The image for the front of this card, with rank and suit
+        /// </summary>
         private BitmapSource _frontPicture;
         public BitmapSource FrontPicture
         {
@@ -86,14 +100,48 @@ namespace CribbageAI
             set { _frontPicture = value; Notify("FrontPicture"); }
         }
 
-        #endregion
-
-        public Card(int rank, int suit, BitmapSource image)
-            : this(rank, suit)
+        /// <summary>
+        /// A smaller image suitable for thumbnails
+        /// </summary>
+        public BitmapSource SmallPicture
         {
-            _frontPicture = image;
+            get
+            {
+                return new TransformedBitmap(FrontPicture.Clone(), new ScaleTransform(.5, .5));
+            }
         }
 
+        /// <summary>
+        /// The image for the back of this card
+        /// </summary>
+        private BitmapSource _backPicture;
+        public BitmapSource BackPicture
+        {
+            get { return _backPicture; }
+            set { _backPicture = value; Notify("BackPicture"); }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a new card object
+        /// </summary>
+        /// <param name="rank">Card rank (1-13 corresponding to Ace through King)</param>
+        /// <param name="suit">Card suit (1-4 corresponding to Clubs/Diamonds/Hearts/Spades)</param>
+        /// <param name="frontImage">Image to use for the front of this card</param>
+        /// <param name="backImage">Image to use for the back of this card</param>
+        public Card(int rank, int suit, BitmapSource frontImage, BitmapSource backImage)
+            : this(rank, suit)
+        {
+            _frontPicture = frontImage;
+            _backPicture = backImage;
+        }
+
+        /// <summary>
+        /// Creates a new card object
+        /// </summary>
+        /// <param name="rank">Card rank (1-13 corresponding to Ace through King)</param>
+        /// <param name="suit">Card suit (1-4 corresponding to Clubs/Diamonds/Hearts/Spades)</param>
         public Card(int rank, int suit)
         {
             _rank = rank;

@@ -59,12 +59,5 @@ namespace CribbageAI.Properties {
                 resourceCulture = value;
             }
         }
-        
-        internal static System.Drawing.Bitmap cards {
-            get {
-                object obj = ResourceManager.GetObject("cards", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

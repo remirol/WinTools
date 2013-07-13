@@ -3,20 +3,48 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Cribbage AI/probabilities" 
         SizeToContent="WidthAndHeight" 
-        MinHeight="200" 
-        MinWidth="600"
+        MinHeight="600" 
+        MinWidth="900"
         Loaded="Window_Loaded"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"        
         >
+    <!-- pull in our crap from here -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <DockPanel LastChildFill="False">
-        <ListBox Name="logWindow" DockPanel.Dock="Right" MinWidth="300" MaxHeight="400" ItemsSource="{Binding Path=logMessages}"></ListBox>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="opposingHand" MinHeight="80"></StackPanel>
+        <ListBox DockPanel.Dock="Right" Name="evaluationList" MinWidth="400" MaxHeight="600"
+                 ItemsSource="{Binding Path=evaluations}" ItemTemplate="{StaticResource evalTemplate}"></ListBox>
+        <ItemsControl Name="opposingHand" DockPanel.Dock="Top" MinWidth="540" MinHeight="140" HorizontalAlignment="Left"
+                      ItemsSource="{Binding Path=theirHand}" ItemTemplate="{StaticResource faceDownCard}" Template="{StaticResource itemsControlDefault}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
         <ListBox Name="opponentScore" DockPanel.Dock="Top" MinHeight="100"></ListBox>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Left" Name="upcardPanel">
-            <Button Name="deal" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20,10" Height="30" Width="60" Click="deal_Click">Deal</Button>
-            <Button Name="eval" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="0,10" Height="30" Width="60" Click="eval_Click">Evaluate</Button>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Left" Name="playerHand" MinHeight="80"></StackPanel>
+        
+        <DockPanel LastChildFill="False" DockPanel.Dock="Top" HorizontalAlignment="Right" Name="upcardPanel" MinHeight="130" MinWidth="540">
+            <Image Name="upcardBack" Source="{Binding Path=upcard.BackPicture}" DockPanel.Dock="Left" Width="100" Height="130" />
+            <Image Name="upcardFront" Source="{Binding Path=upcard.FrontPicture}" DockPanel.Dock="Left" Width="100" Height="130" />
+            <Button Name="eval" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="eval_Click">Evaluate</Button>
+            <Button Name="deal" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="deal_Click">Deal</Button>
+        </DockPanel>
+        
+        <ItemsControl Name="playerHand" DockPanel.Dock="Bottom" HorizontalAlignment="Left" MinWidth="540" MinHeight="140" 
+                      ItemsSource="{Binding Path=yourHand}" ItemTemplate="{StaticResource normalCard}" Template="{StaticResource itemsControlDefault}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
         <ListBox Name="playerScore" DockPanel.Dock="Bottom" MinHeight="100"></ListBox>
     </DockPanel>
 </Window>

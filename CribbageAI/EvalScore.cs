@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Media.Imaging;
+using System.Collections.ObjectModel;
+using System.Windows.Media;
+using System.Windows.Controls;
 
 namespace CribbageAI
 {
@@ -9,7 +13,9 @@ namespace CribbageAI
     {
         public int[] Scores;
 
-        public List<Card> scoredHand;
+        #region Properties
+
+        public ObservableCollection<Card> scoredHand { get; set; }
 
         public int High
         {
@@ -36,15 +42,17 @@ namespace CribbageAI
             get { return Scores.ToList().Average(); }
         }
 
-        public double PctOfHigh
+        public double PotentialGain
         {
-            get { return High > 0 ? Average/High : 0.0; }
+            get { return Average - Low; }
         }
+
+        #endregion
 
         public EvalScore()
         {
             Scores = new int[13];
-            scoredHand = new List<Card>();
+            scoredHand = new ObservableCollection<Card>();
         }
 
         #region IComparable Members

@@ -57,10 +57,7 @@ namespace CribbageAI
             generator = gen;
             _cards = new List<Card>();
             orderedList = new List<Card>();
-
-            String workingDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            allCards = new BitmapImage(new Uri(System.IO.Path.Combine(workingDir, "cards.png")));
-
+            allCards = new BitmapImage(new Uri(@"pack://application:,,,/Images/cards.png"));
             FillDeck(true);
         }
 
@@ -80,16 +77,13 @@ namespace CribbageAI
                         int cardY = cardHeight * (suit - 1);
                         System.Windows.Int32Rect rect = new System.Windows.Int32Rect(cardX, cardY, cardWidth, cardHeight);
                         CroppedBitmap subCard = new CroppedBitmap(allCards, rect);
-                        orderedList.Add(new Card(rank, suit, subCard));
 
-                        // do the backing if this is the first time through (no need to do it every time)
-                        if (rank == 1 && suit == 1)
-                        {
-                            // we know where our 'back' card is
-                            rect.X = cardWidth * 2;
-                            rect.Y = cardHeight * 4;
-                            _backPicture = new CroppedBitmap(allCards, rect);
-                        }
+                        // we know where our 'back' card is
+                        rect.X = cardWidth * 2;
+                        rect.Y = cardHeight * 4;
+                        CroppedBitmap cardBack = new CroppedBitmap(allCards, rect);
+
+                        orderedList.Add(new Card(rank, suit, subCard, cardBack));
                     }
                     else
                     {
