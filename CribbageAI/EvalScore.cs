@@ -47,12 +47,15 @@ namespace CribbageAI
             get { return Average - Low; }
         }
 
+        public bool PlayerSelection { get; set; }
+
         #endregion
 
         public EvalScore()
         {
             Scores = new int[13];
             scoredHand = new ObservableCollection<Card>();
+            PlayerSelection = false;
         }
 
         #region IComparable Members

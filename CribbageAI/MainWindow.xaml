@@ -19,8 +19,10 @@
     </Window.Resources>
     
     <DockPanel LastChildFill="False">
-        <ListBox DockPanel.Dock="Right" Name="evaluationList" MinWidth="400" MaxHeight="600"
-                 ItemsSource="{Binding Path=evaluations}" ItemTemplate="{StaticResource evalTemplate}"></ListBox>
+        <TextBox Name="statusBar" BorderBrush="Black" BorderThickness="1" Focusable="False" IsReadOnly="True" DockPanel.Dock="Bottom" 
+                 MinHeight="30" Width="Auto" Background="#FFE5E5E5" Margin="0,5,0,0"/>
+        <ListBox DockPanel.Dock="Right" Name="evaluationList" MinWidth="400" Height="Auto" MaxHeight="650"
+                 ItemsSource="{Binding Path=evaluations}" ItemTemplate="{StaticResource evalTemplate}" ></ListBox>
         
         <ItemsControl Name="opposingHand" DockPanel.Dock="Top" MinWidth="540" MinHeight="140" HorizontalAlignment="Left"
                       ItemsSource="{Binding Path=theirHand}" ItemTemplate="{StaticResource faceDownCard}" Template="{StaticResource itemsControlDefault}">
@@ -32,16 +34,17 @@
         </ItemsControl>
         <ListBox Name="opponentScore" DockPanel.Dock="Top" MinHeight="100"></ListBox>
         
-        <DockPanel LastChildFill="False" DockPanel.Dock="Top" HorizontalAlignment="Right" Name="upcardPanel" MinHeight="130" MinWidth="540">
-            <Image Name="upcardBack" Source="{Binding Path=upcard.BackPicture}" DockPanel.Dock="Left" Width="100" Height="130" />
-            <Image Name="upcardFront" Source="{Binding Path=upcard.FrontPicture}" DockPanel.Dock="Left" Width="100" Height="130" />
+        <DockPanel LastChildFill="False" DockPanel.Dock="Top" HorizontalAlignment="Right" VerticalAlignment="Center" Name="upcardPanel" MinHeight="125" MinWidth="540">
+            <Image Name="upcardBack" Source="{Binding Path=upcard.BackPicture}" DockPanel.Dock="Left" Width="100" Height="125" />
+            <Image Name="upcardFront" Source="{Binding Path=upcard.FrontPicture}" DockPanel.Dock="Left" Width="100" Height="125" />
             <Button Name="exit" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="exit_Click">Exit</Button>
             <Button Name="eval" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="eval_Click">Evaluate</Button>
             <Button Name="deal" DockPanel.Dock="Right" Margin="10" Height="30" Width="60" Click="deal_Click">Deal</Button>
         </DockPanel>
         
-        <ItemsControl Name="playerHand" DockPanel.Dock="Bottom" HorizontalAlignment="Left" MinWidth="540" MinHeight="140" 
-                      ItemsSource="{Binding Path=yourHand}" ItemTemplate="{StaticResource normalCard}" Template="{StaticResource itemsControlDefault}">
+        <ItemsControl Name="playerHand" DockPanel.Dock="Bottom" HorizontalAlignment="Left" MinWidth="540" MinHeight="160" 
+                      ItemsSource="{Binding Path=yourHand}" ItemTemplate="{StaticResource normalCard}" Template="{StaticResource itemsControlDefault}"
+                      MouseDown="playerHand_MouseDown" MouseUp="playerHand_MouseUp">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal"/>

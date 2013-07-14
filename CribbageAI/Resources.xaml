@@ -8,12 +8,14 @@
 
     <!-- and our normal bitmaps -->
     <DataTemplate x:Key="normalCard" DataType="local:Card">
-        <Image Source="{Binding Path=FrontPicture}" Width="{Binding Path=FrontPicture.PixelWidth}" Height="{Binding Path=FrontPicture.PixelHeight}" Margin="5,0"/>
+        <Image Source="{Binding Path=FrontPicture}" Width="{Binding Path=FrontPicture.PixelWidth}" Height="{Binding Path=FrontPicture.PixelHeight}" 
+               VerticalAlignment="Bottom" Margin="5,0"/>
     </DataTemplate>
 
     <!-- and our face down bitmaps -->
     <DataTemplate x:Key="faceDownCard" DataType="local:Card">
-        <Image Source="{Binding Path=BackPicture}" Width="{Binding Path=BackPicture.PixelWidth}" Height="{Binding Path=BackPicture.PixelHeight}" Margin="5,0"/>
+        <Image Source="{Binding Path=BackPicture}" Width="{Binding Path=BackPicture.PixelWidth}" Height="{Binding Path=BackPicture.PixelHeight}" 
+               VerticalAlignment="Top" Margin="5,0"/>
     </DataTemplate>
 
     <!-- we need a generic one in a few places since we use horizontal lists -->
@@ -21,6 +23,15 @@
         <ItemsPresenter />
     </ControlTemplate>
 
+    <!-- for the one we selected -->
+    <Style x:Key="panelHighlight" TargetType="StackPanel">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=PlayerSelection}" Value="True">
+                <Setter Property="Background" Value="LightBlue"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    
     <!-- handles making our evaluations not inherently ugly-->
     <DataTemplate x:Key="evalTemplate" DataType="local:EvalScore">
         <DataTemplate.Resources>
@@ -29,8 +40,8 @@
                 <Setter Property="FontSize" Value="14" />
             </Style>
         </DataTemplate.Resources>
-        <StackPanel Orientation="Horizontal" Margin="0,5">
-            <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Margin="0,2" Style="{StaticResource panelHighlight}">
+            <StackPanel Orientation="Horizontal" Margin="5,5">
                 <ItemsControl ItemsSource="{Binding Path=scoredHand}" ItemTemplate="{StaticResource smallCard}" Template="{StaticResource itemsControlDefault}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -39,7 +50,7 @@
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
             </StackPanel>
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical" Margin="0,5">
                 <TextBlock>
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}Expected: {0:F2}   ">

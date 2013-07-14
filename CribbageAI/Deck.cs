@@ -23,23 +23,41 @@ namespace CribbageAI
 
         #endregion
 
-        private BitmapSource _backPicture;
-        public BitmapSource BackPicture
-        {
-            get { return _backPicture; }
-            set { _backPicture = value; Notify("BackPicture"); }
-        }
+        #region properties
 
         private List<Card> _cards;
+        /// <summary>
+        /// All cards currently in the working deck
+        /// </summary>
         public List<Card> Cards
         {
             get { return _cards; }
         }
 
+        /// <summary>
+        /// A stock 52-card deck that never changes; used for performance reasons
+        /// to avoid constantly redoing the card picture transforms
+        /// </summary>
+        private List<Card> stockDeck;
+
+        /// <summary>
+        /// Temporary list of cards for shuffling
+        /// </summary>
         private List<Card> orderedList;
+
+        /// <summary>
+        /// Deck-private RNG, so that even if someone doesn't pass us one in, we
+        /// won't constantly reseed ourselves as long as we're using the same deck
+        /// </summary>
         private Random generator;
 
+        /// <summary>
+        /// Bitmap with all cards on it; expected to be four rows of Ace through King in CDHS order
+        /// and then a fifth with two jokers and the card back
+        /// </summary>
         private BitmapSource allCards;
+
+        #endregion
 
         /// <summary>
         /// Create a new deck with an internal RNG
@@ -57,14 +75,15 @@ namespace CribbageAI
             generator = gen;
             _cards = new List<Card>();
             orderedList = new List<Card>();
+            stockDeck = new List<Card>();
             allCards = new BitmapImage(new Uri(@"pack://application:,,,/Images/cards.png"));
-            FillDeck(true);
+            BuildDeck(true);
         }
 
-        private void FillDeck(bool useImages)
+        private void BuildDeck(bool useImages)
         {
             // fill the base deck we have to work with
-            orderedList.Clear();
+            stockDeck.Clear();
             for (int suit = 1; suit < 5; suit++)
             {
                 for (int rank = 1; rank < 14; rank++)
@@ -83,11 +102,11 @@ namespace CribbageAI
                         rect.Y = cardHeight * 4;
                         CroppedBitmap cardBack = new CroppedBitmap(allCards, rect);
 
-                        orderedList.Add(new Card(rank, suit, subCard, cardBack));
+                        stockDeck.Add(new Card(rank, suit, subCard, cardBack));
                     }
                     else
                     {
-                        orderedList.Add(new Card(rank, suit));
+                        stockDeck.Add(new Card(rank, suit));
                     }
 
                 }
@@ -100,7 +119,7 @@ namespace CribbageAI
         public void Shuffle()
         {
             _cards.Clear();
-            FillDeck(true);
+            orderedList = new List<Card>(stockDeck);
 
             for (int i = 0; i < 52; i++)
             {
@@ -134,6 +153,7 @@ namespace CribbageAI
                 pile.Add(_cards.First());
                 _cards.Remove(_cards.First());
             }
+            pile.Sort();
             return pile;
         }
     }

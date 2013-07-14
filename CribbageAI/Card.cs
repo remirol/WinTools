@@ -97,9 +97,14 @@ namespace CribbageAI
         public BitmapSource FrontPicture
         {
             get { return _frontPicture; }
-            set { _frontPicture = value; Notify("FrontPicture"); }
+            set 
+            { 
+                _frontPicture = value;
+                Notify("FrontPicture"); 
+            }
         }
 
+        private BitmapSource _smallPicture;
         /// <summary>
         /// A smaller image suitable for thumbnails
         /// </summary>
@@ -107,7 +112,7 @@ namespace CribbageAI
         {
             get
             {
-                return new TransformedBitmap(FrontPicture.Clone(), new ScaleTransform(.5, .5));
+                return _smallPicture;
             }
         }
 
@@ -120,6 +125,11 @@ namespace CribbageAI
             get { return _backPicture; }
             set { _backPicture = value; Notify("BackPicture"); }
         }
+
+        /// <summary>
+        /// Has this card been selected in some manner?
+        /// </summary>
+        public bool selected { get; set; }
 
         #endregion
 
@@ -135,6 +145,7 @@ namespace CribbageAI
         {
             _frontPicture = frontImage;
             _backPicture = backImage;
+            _smallPicture = new TransformedBitmap(frontImage.Clone(), new ScaleTransform(.5, .5));    // set this now for speed
         }
 
         /// <summary>
